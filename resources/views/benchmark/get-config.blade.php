@@ -1,32 +1,32 @@
-@extends('layout')
+@extends('layout.main')
 
 @section('content')
-    <table>
-        <thead>
-        <tr>
-            @foreach(array_first($results) as $name => $time)
-                <th>{{ $name }}</th>
-            @endforeach
-        </tr>
-        </thead>
-        <tbody>
-        @foreach($results as $tests)
-            <tr>
-                @foreach($tests as $time)
+    <h2><b>Average times:</b></h2>
+    <div>
+        <table>
+            <tbody>
+            @foreach ($avg as $name => $time)
+                <tr>
+                    <td><b>{{ $name }}:</b></td>
                     <td>{{ $time }}s</td>
-                @endforeach
-            </tr>
-        @endforeach
-        </tbody>
-        <tbody>
-        <tr>
-            <td colspan="{{ count($avg) }}">Average times</td>
-        </tr>
-        <tr>
-            @foreach($avg as $time)
-                <td>{{ $time }}s</td>
+                </tr>
             @endforeach
-        </tr>
-        </tbody>
-    </table>
+            </tbody>
+        </table>
+    </div>
+
+    @foreach ($results as $tests)
+        <div style="margin-top: 20px;">
+            <table style="border: 1px solid black">
+                <tbody>
+                @foreach ($tests as $name => $time)
+                    <tr>
+                        <td><b>{{ $name }}:</b></td>
+                        <td>{{ $time }}s</td>
+                    </tr>
+                @endforeach
+                </tbody>
+            </table>
+        </div>
+    @endforeach
 @endsection

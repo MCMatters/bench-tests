@@ -2,7 +2,7 @@
 
 declare(strict_types = 1);
 
-namespace App\Http\Controllers\Benchmark;
+namespace App\Http\Controllers;
 
 use Illuminate\Foundation\Application;
 use Illuminate\Routing\Controller;
@@ -13,11 +13,11 @@ use const true;
 use function microtime, rtrim, sprintf;
 
 /**
- * Class AbstractBenchmarkController
+ * Class BenchmarkController
  *
  * @package App\Http\Controllers\Benchmark
  */
-abstract class AbstractBenchmarkController extends Controller
+abstract class BenchmarkController extends Controller
 {
     /**
      * @var Application
@@ -51,7 +51,7 @@ abstract class AbstractBenchmarkController extends Controller
 
         $this->{$method}(...$args);
 
-        return rtrim(sprintf('%.20f', microtime(true) - $start), '0');
+        return $this->getFloatValue(microtime(true) - $start);
     }
 
     /**
@@ -65,8 +65,10 @@ abstract class AbstractBenchmarkController extends Controller
         $reflection = new ReflectionClass($this);
 
         foreach ($reflection->getMethods() as $method) {
-            if (Str::endsWith($method->getName(), 'Test')) {
-                $methods[] = $method->getName();
+            $name = $method->getName();
+
+            if ($name !== 'runTest' && Str::endsWith($name, 'Test')) {
+                $methods[] = $name;
             }
         }
 
@@ -80,6 +82,16 @@ abstract class AbstractBenchmarkController extends Controller
      */
     protected function avg(array $array): string
     {
-        return rtrim(sprintf('%.20f', array_sum($array) / count($array)), '0');
+        return $this->getFloatValue(array_sum($array) / count($array));
+    }
+
+    /**
+     * @param mixed $value
+     *
+     * @return string
+     */
+    protected function getFloatValue($value): string
+    {
+        return rtrim(sprintf('%.20f', $value), '0');
     }
 }

@@ -4,14 +4,26 @@ declare(strict_types = 1);
 
 namespace App\Http\Controllers\Benchmark;
 
+use App\Http\Controllers\BenchmarkController;
 use Config;
 use Illuminate\Container\Container;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Config as ConfigFacade;
+use Illuminate\View\View;
+use function app, asort, config;
 
-class GetConfig extends AbstractBenchmarkController
+/**
+ * Class GetConfig
+ *
+ * @package App\Http\Controllers\Benchmark
+ */
+class GetConfig extends BenchmarkController
 {
-    public function test()
+    /**
+     * @return View
+     * @throws \ReflectionException
+     */
+    public function test(): View
     {
         // Ensure that it is resolved.
         $this->app->make('config');
@@ -30,6 +42,8 @@ class GetConfig extends AbstractBenchmarkController
         foreach ($tests as $test) {
             $avg[$test] = $this->avg(Arr::pluck($results, $test));
         }
+
+        asort($avg);
 
         return view('benchmark.get-config', ['results' => $results, 'avg' => $avg]);
     }
