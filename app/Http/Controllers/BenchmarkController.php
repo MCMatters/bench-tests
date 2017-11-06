@@ -6,11 +6,13 @@ namespace App\Http\Controllers;
 
 use Illuminate\Foundation\Application;
 use Illuminate\Routing\Controller;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
+use McMatters\Helpers\Helpers\MathHelper;
 use ReflectionClass;
 use ReflectionException;
 use const true;
-use function microtime, rtrim, sprintf;
+use function count, memory_get_usage, microtime, rtrim, sprintf, substr;
 
 /**
  * Class BenchmarkController
@@ -43,15 +45,19 @@ abstract class BenchmarkController extends Controller
      * @param string $method
      * @param array $args
      *
-     * @return string
+     * @return array
      */
-    protected function runTest(string $method, array $args = []): string
+    protected function runTest(string $method, array $args = []): array
     {
-        $start = microtime(true);
+        $timeStart = microtime(true);
+        $memory = memory_get_usage();
 
         $this->{$method}(...$args);
 
-        return $this->getFloatValue(microtime(true) - $start);
+        return [
+            'time'   => $this->getFloatValue(microtime(true) - $timeStart),
+            'memory' => MathHelper::convertBytes(memory_get_usage() - $memory, 'kb'),
+        ];
     }
 
     /**
@@ -78,11 +84,33 @@ abstract class BenchmarkController extends Controller
     /**
      * @param array $array
      *
+     * @param string|null $key
+     *
      * @return string
      */
-    protected function avg(array $array): string
+    protected function avg(array $array, string $key = null): string
     {
+        $array = null === $key ? $array : Arr::pluck($array, $key);
+
         return $this->getFloatValue(array_sum($array) / count($array));
+    }
+
+    /**
+     * @return array
+     */
+    protected function getTestItems(): array
+    {
+        return ['time', 'memory'];
+    }
+
+    /**
+     * @param string $method
+     *
+     * @return string
+     */
+    protected function sanitizeMethodName(string $method): string
+    {
+        return substr($method, 0, -4);
     }
 
     /**

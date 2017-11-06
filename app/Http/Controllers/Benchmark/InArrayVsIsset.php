@@ -5,6 +5,7 @@ declare(strict_types = 1);
 namespace App\Http\Controllers\Benchmark;
 
 use App\Http\Controllers\BenchmarkController;
+use Illuminate\View\View;
 use const false;
 use function array_filter, array_flip, explode, in_array, md5, preg_replace,
     random_bytes, substr, substr_count;
@@ -17,21 +18,32 @@ use function array_filter, array_flip, explode, in_array, md5, preg_replace,
 class InArrayVsIsset extends BenchmarkController
 {
     /**
-     * @return void
+     * @return View
      * @throws \ReflectionException
      */
-    public function test()
+    public function test(): View
     {
+        $avg = [];
+
         $string = $this->getRandomString();
 
         $count = substr_count($string, ' ') + 1;
         $exploded = array_filter(explode(' ', $string));
 
-        echo "Count of items: {$count}<br/><br/>";
-
         foreach ($this->getTests() as $method) {
-            echo "{$method}: {$this->runTest($method, [$count, $exploded])}<br/>";
+            $executed[$this->sanitizeMethodName($method)][] = $this->runTest(
+                $method,
+                [$count, $exploded]
+            );
         }
+
+        foreach ($executed as $method => $results) {
+            foreach ($this->getTestItems() as $item) {
+                $avg[$method][$item] = $this->avg($results, $item);
+            }
+        }
+
+        return view('benchmark.in_array-isset', ['avg' => $avg, 'count' => $count]);
     }
 
     /**

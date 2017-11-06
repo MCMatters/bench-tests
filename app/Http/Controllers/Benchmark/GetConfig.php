@@ -7,7 +7,6 @@ namespace App\Http\Controllers\Benchmark;
 use App\Http\Controllers\BenchmarkController;
 use Config;
 use Illuminate\Container\Container;
-use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Config as ConfigFacade;
 use Illuminate\View\View;
 use function app, asort, config;
@@ -28,24 +27,24 @@ class GetConfig extends BenchmarkController
         // Ensure that it is resolved.
         $this->app->make('config');
 
-        $tests = $this->getTests();
-
-        $results = [];
+        $executed = [];
         $avg = [];
 
         for ($i = 0; $i < 100; $i++) {
-            foreach ($tests as $test) {
-                $results[$i][$test] = $this->runTest($test);
+            foreach ($this->getTests() as $method) {
+                $executed[$this->sanitizeMethodName($method)][] = $this->runTest($method);
             }
         }
 
-        foreach ($tests as $test) {
-            $avg[$test] = $this->avg(Arr::pluck($results, $test));
+        foreach ($executed as $method => $results) {
+            foreach ($this->getTestItems() as $item) {
+                $avg[$method][$item] = $this->avg($results, $item);
+            }
         }
 
         asort($avg);
 
-        return view('benchmark.get-config', ['results' => $results, 'avg' => $avg]);
+        return view('benchmark.get-config', ['avg' => $avg]);
     }
 
     /**
