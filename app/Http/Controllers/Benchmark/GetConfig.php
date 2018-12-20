@@ -7,6 +7,7 @@ namespace App\Http\Controllers\Benchmark;
 use App\Http\Controllers\BenchmarkController;
 use Config;
 use Illuminate\Container\Container;
+use Illuminate\Contracts\Cache\Repository;
 use Illuminate\Support\Facades\Config as ConfigFacade;
 use Illuminate\View\View;
 use function app, asort, config;
@@ -19,6 +20,11 @@ use function app, asort, config;
 class GetConfig extends BenchmarkController
 {
     /**
+     * @var array
+     */
+    protected $resolvingMethods = ['*'];
+
+    /**
      * @return View
      * @throws \ReflectionException
      */
@@ -29,9 +35,10 @@ class GetConfig extends BenchmarkController
 
         $executed = [];
         $avg = [];
+        $tests = $this->getTests();
 
         for ($i = 0; $i < 100; $i++) {
-            foreach ($this->getTests() as $method) {
+            foreach ($tests as $method) {
                 $executed[$this->sanitizeMethodName($method)][] = $this->runTest($method);
             }
         }
@@ -118,5 +125,15 @@ class GetConfig extends BenchmarkController
     protected function offsetApplicationGetTest()
     {
         $this->app['config']->get('services');
+    }
+
+    /**
+     * @param \Illuminate\Contracts\Cache\Repository $cache
+     *
+     * @return void
+     */
+    protected function dependencyInjectionTest(Repository $cache)
+    {
+        $cache->get('services');
     }
 }

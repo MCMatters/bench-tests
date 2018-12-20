@@ -9,3 +9,4 @@ Route::get('bench/in_array-isset', 'Benchmark\InArrayVsIsset@test');
 Route::get('bench/view', 'Benchmark\View@test');
 Route::get('bench/reference-overriding', 'Benchmark\ReferenceVsOverriding@test');
 Route::get('bench/array-compact', 'Benchmark\ArrayVsCompact@test');
+Route::get('bench/casting-int-foreach-array_map', 'Benchmark\CastingIntForeachVsArrayMap@test');
