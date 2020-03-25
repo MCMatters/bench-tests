@@ -1,0 +1,38 @@
+version: '3'
+services:
+  php:
+    build:
+      context: .
+    container_name: bench_php
+    env_file:
+      - .docker.env
+    volumes:
+      - $PWD:/app:cached
+      - $PWD/docker/php/local.ini:/usr/local/etc/php/conf.d/local.ini
+      - shared_composer_cache:/root/.composer
+    networks:
+      - default
+
+  nginx:
+    image: nginx:1.17
+    container_name: bench_nginx
+    volumes:
+      - $PWD:/app:cached
+      - $PWD/docker/nginx/default.conf:/etc/nginx/conf.d/default.conf:cached
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.bench.rule=Host(`bench.loc`)"
+      - "traefik.http.routers.bench.entrypoints=web"
+    networks:
+      - default
+      - web
+
+networks:
+  default:
+    internal: true
+  web:
+    external: true
+
+volumes:
+  shared_composer_cache:
+    external: true

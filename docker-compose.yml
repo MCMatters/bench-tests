@@ -1,0 +1,20 @@
+version: '3'
+services:
+  php:
+    build:
+      context: .
+    container_name: bench_php
+    env_file:
+      - .docker.env
+    volumes:
+      - $PWD:/app:cached
+      - $PWD/docker/php/local.ini:/usr/local/etc/php/conf.d/local.ini
+
+  nginx:
+    image: nginx:1.17
+    container_name: bench_nginx
+    ports:
+      - 80:80
+    volumes:
+      - $PWD:/app:cached
+      - $PWD/docker/nginx/default.conf:/etc/nginx/conf.d/default.conf

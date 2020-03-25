@@ -2,11 +2,9 @@
 
 declare(strict_types = 1);
 
+use App\Http\Controllers\BenchmarkController;
+use Illuminate\Support\Facades\Route;
+
 Route::view('/', 'index');
 
-Route::get('bench/get-config', 'Benchmark\GetConfig@test');
-Route::get('bench/in_array-isset', 'Benchmark\InArrayVsIsset@test');
-Route::get('bench/view', 'Benchmark\View@test');
-Route::get('bench/reference-overriding', 'Benchmark\ReferenceVsOverriding@test');
-Route::get('bench/array-compact', 'Benchmark\ArrayVsCompact@test');
-Route::get('bench/casting-int-foreach-array_map', 'Benchmark\CastingIntForeachVsArrayMap@test');
+Route::get('bench/{arg}', BenchmarkController::class);

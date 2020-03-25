@@ -1,16 +1,10 @@
 @extends('layout.main')
 
-@inject('router', 'Illuminate\Routing\Router')
-
 @section('content')
     <ul>
-        @foreach ($router->getRoutes() as $route)
-            @if ($route->uri() === '/')
-                @continue
-            @endif
-
+        @foreach (Config::get('benchmark.benchmarks') as $uri => $class)
             <li>
-                <a href="{!! url($route->uri()) !!}">{{ $route->getActionName() }}</a>
+                <a href="{!! URL::to("/bench/{$uri}") !!}">{{ $class }}</a>
             </li>
         @endforeach
     </ul>

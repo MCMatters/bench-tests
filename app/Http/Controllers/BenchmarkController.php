@@ -1,168 +1,51 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
-use Illuminate\Container\Container;
-use Illuminate\Foundation\Application;
+use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Routing\Controller;
-use Illuminate\Support\{Arr, Str};
-use McMatters\Helpers\Helpers\MathHelper;
-use ReflectionClass;
-use ReflectionException;
-use const true;
-use function count, in_array, memory_get_usage, microtime, rtrim, sprintf, substr;
+use Illuminate\Support\Facades\Config;
+use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 
 /**
  * Class BenchmarkController
  *
  * @package App\Http\Controllers\Benchmark
  */
-abstract class BenchmarkController extends Controller
+class BenchmarkController extends Controller
 {
     /**
-     * @var Application
-     */
-    protected $app;
-
-    /**
-     * @var \Illuminate\Routing\Route
-     */
-    protected $route;
-
-    /**
-     * @var \Illuminate\Routing\Contracts\ControllerDispatcher
-     */
-    protected $controllerDispatcher;
-
-    /**
-     * @var array
-     */
-    protected $resolvingMethods = [];
-
-    /**
-     * AbstractBenchmarkController constructor.
+     * @param \Illuminate\Contracts\Foundation\Application $app
+     * @param string $arg
      *
-     * @param Application $app
-     */
-    public function __construct(Application $app)
-    {
-        /** @var \Illuminate\Routing\Router $router */
-        $router = $app->make('router');
-
-        $this->app = $app;
-        $this->route = $router->current();
-        $this->controllerDispatcher = $this->route->controllerDispatcher();
-    }
-
-    /**
      * @return mixed
-     */
-    abstract public function test();
-
-    /**
-     * @param string $method
-     * @param array $args
      *
-     * @return array
+     * @throws \Illuminate\Contracts\Container\BindingResolutionException
      */
-    protected function runTest(string $method, array $args = []): array
+    public function __invoke(Application $app, string $arg)
     {
-        $timeStart = microtime(true);
-        $memory = memory_get_usage();
+        $class = $this->getBenchThroughRoute($arg);
 
-        $this->shouldRunWithResolving($method)
-            ? $this->runTestWithResolving($method)
-            : $this->{$method}(...$args);
-
-        return [
-            'time'   => $this->getFloatValue(microtime(true) - $timeStart),
-            'memory' => MathHelper::convertBytes(memory_get_usage() - $memory, 'kb'),
-        ];
+        return $app->make($class)->test();
     }
 
     /**
-     * @param string $method
+     * @param string $arg
      *
-     * @return void
-     */
-    protected function runTestWithResolving(string $method): void
-    {
-        $this->controllerDispatcher->dispatch($this->route, $this, $method);
-    }
-
-    /**
-     * @param string $method
+     * @return string
      *
-     * @return bool
+     * @throws \Symfony\Component\HttpKernel\Exception\BadRequestHttpException
      */
-    protected function shouldRunWithResolving(string $method): bool
+    protected function getBenchThroughRoute(string $arg): string
     {
-        return $this->resolvingMethods === ['*'] ||
-            in_array($method, $this->resolvingMethods, true);
-    }
+        $map = Config::get('benchmark.benchmarks');
 
-    /**
-     * @return array
-     * @throws ReflectionException
-     */
-    protected function getTests(): array
-    {
-        $methods = [];
-
-        $reflection = new ReflectionClass($this);
-
-        foreach ($reflection->getMethods() as $method) {
-            $name = $method->getName();
-
-            if ($name !== 'runTest' && Str::endsWith($name, 'Test')) {
-                $methods[] = $name;
-            }
+        if (!isset($map[$arg])) {
+            throw new BadRequestHttpException();
         }
 
-        return $methods;
-    }
-
-    /**
-     * @param array $array
-     *
-     * @param string|null $key
-     *
-     * @return string
-     */
-    protected function avg(array $array, string $key = null): string
-    {
-        $array = null === $key ? $array : Arr::pluck($array, $key);
-
-        return $this->getFloatValue(array_sum($array) / count($array));
-    }
-
-    /**
-     * @return array
-     */
-    protected function getTestItems(): array
-    {
-        return ['time', 'memory'];
-    }
-
-    /**
-     * @param string $method
-     *
-     * @return string
-     */
-    protected function sanitizeMethodName(string $method): string
-    {
-        return substr($method, 0, -4);
-    }
-
-    /**
-     * @param mixed $value
-     *
-     * @return string
-     */
-    protected function getFloatValue($value): string
-    {
-        return rtrim(sprintf('%.20f', $value), '0');
+        return $map[$arg];
     }
 }

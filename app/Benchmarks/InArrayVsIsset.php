@@ -1,56 +1,52 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
-namespace App\Http\Controllers\Benchmark;
+namespace App\Benchmarks;
 
-use App\Http\Controllers\BenchmarkController;
-use Illuminate\View\View;
-use const false;
+use Illuminate\Contracts\View\View;
+use Illuminate\Support\Facades\View as ViewFacade;
+
 use function array_filter, array_flip, explode, in_array, md5, preg_replace,
     random_bytes, substr, substr_count;
+
+use const false;
 
 /**
  * Class InArrayVsIsset
  *
- * @package App\Http\Controllers\Benchmark
+ * @package App\Benchmarks
  */
-class InArrayVsIsset extends BenchmarkController
+class InArrayVsIsset extends Benchmark
 {
     /**
-     * @return View
+     * @return \Illuminate\Contracts\View\View
+     *
      * @throws \ReflectionException
+     * @throws \Exception
      */
     public function test(): View
     {
-        $avg = [];
-
         $string = $this->getRandomString();
 
         $count = substr_count($string, ' ') + 1;
         $exploded = array_filter(explode(' ', $string));
 
-        foreach ($this->getTests() as $method) {
-            $executed[$this->sanitizeMethodName($method)][] = $this->runTest(
-                $method,
-                [$count, $exploded]
-            );
-        }
-
-        foreach ($executed as $method => $results) {
-            foreach ($this->getTestItems() as $item) {
-                $avg[$method][$item] = $this->avg($results, $item);
-            }
-        }
-
-        return view('benchmark.in_array-isset', ['avg' => $avg, 'count' => $count]);
+        return ViewFacade::make('benchmark.in_array-isset', [
+            'result' => $this->runTests([$count, $exploded], 10),
+            'count' => $count,
+        ]);
     }
 
     /**
      * @param int $count
      * @param array $exploded
+     *
+     * @return void
+     *
+     * @throws \Exception
      */
-    protected function inArrayTest(int $count, array $exploded)
+    public function inArrayTest(int $count, array $exploded)
     {
         $k = 0;
 
@@ -68,8 +64,12 @@ class InArrayVsIsset extends BenchmarkController
     /**
      * @param int $count
      * @param array $exploded
+     *
+     * @return void
+     *
+     * @throws \Exception
      */
-    protected function issetTest(int $count, array $exploded)
+    public function issetTest(int $count, array $exploded)
     {
         $k = 0;
         $flip = array_flip($exploded);
@@ -87,6 +87,8 @@ class InArrayVsIsset extends BenchmarkController
 
     /**
      * @return string
+     *
+     * @throws \Exception
      */
     protected function getRandomString(): string
     {
@@ -103,6 +105,8 @@ class InArrayVsIsset extends BenchmarkController
 
     /**
      * @return string
+     *
+     * @throws \Exception
      */
     protected function searchString(): string
     {

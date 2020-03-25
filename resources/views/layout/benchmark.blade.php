@@ -1,22 +1,23 @@
 @extends('layout.main')
 
 @section('content')
-    <h2>Average times:</h2>
     @yield('content-header')
     <table class="table table-striped table-bordered table-sm">
         <thead class="thead-inverse">
         <tr>
             <th>Test</th>
-            <th>Time, s</th>
-            <th>Memory, Kb</th>
+            <th>min time, s</th>
+            <th>max time, s</th>
+            <th>avg time, s</th>
         </tr>
         </thead>
         <tbody>
-        @foreach ($avg as $name => $results)
+        @foreach ($result as $name => $results)
             <tr>
                 <td><b>{{ $name }}</b></td>
-                <td>{{ $results['time'] }}</td>
-                <td>{{ $results['memory'] }}</td>
+                <td>{{ $results['min'] }}</td>
+                <td>{{ $results['max'] }}</td>
+                <td>{{ $results['avg'] }}</td>
             </tr>
         @endforeach
         </tbody>

@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace App\Providers;
 
@@ -15,17 +15,12 @@ use Illuminate\Foundation\Support\Providers\RouteServiceProvider as ServiceProvi
 class RouteServiceProvider extends ServiceProvider
 {
     /**
-     * @var string
-     */
-    protected $namespace = 'App\Http\Controllers';
-
-    /**
      * @return void
      */
-    public function map()
+    public function map(): void
     {
         Route::middleware('web')
             ->namespace($this->namespace)
-            ->group(base_path('routes/web.php'));
+            ->group("{$this->app->basePath()}/routes/web.php");
     }
 }
