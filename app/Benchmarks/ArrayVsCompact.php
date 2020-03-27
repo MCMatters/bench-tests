@@ -27,7 +27,9 @@ class ArrayVsCompact extends Benchmark
             ['foo' => '', 'bar' => '', 'baz' => '']
         );
 
-        return ViewFacade::make('benchmark.view', ['result' =>  $this->runTests()]);
+        return ViewFacade::make('benchmark.default', [
+            'results' =>  $this->runTests(),
+        ]);
     }
 
     /**

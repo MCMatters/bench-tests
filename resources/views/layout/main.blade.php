@@ -1,17 +1,16 @@
 <!doctype html>
 <html>
 <head>
-    <title>Tests</title>
-    <link rel="stylesheet" href="{!! asset('assets/css/app.css') !!}">
+    <title>Benchmark tests</title>
+    <link rel="stylesheet" href="{!! URL::asset('assets/css/app.css') !!}">
 </head>
 <body>
 <div class="container-fluid">
-    <div class="row">
-        <main class="col-12">
-            @yield('content')
-        </main>
+    <div id="app">
+        @yield('content-header')
+        @yield('content')
     </div>
 </div>
-<script type="text/javascript" src="{!! asset('assets/js/app.js') !!}"></script>
+<script type="text/javascript" src="{!! URL::asset('assets/js/app.js') !!}"></script>
 </body>
 </html>

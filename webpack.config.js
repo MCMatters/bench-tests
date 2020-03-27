@@ -1,81 +1,96 @@
 const path = require('path');
 const webpack = require('webpack');
-const ExtractTextPlugin = require('extract-text-webpack-plugin');
-const OptimizeCssAssetsPlugin = require('optimize-css-assets-webpack-plugin');
-const CleanWebpackPlugin = require('clean-webpack-plugin');
+const { CleanWebpackPlugin } = require('clean-webpack-plugin');
+const MiniCssExtractPlugin = require('mini-css-extract-plugin');
+const VueLoaderPlugin = require('vue-loader/lib/plugin');
 
-module.exports = {
-  context: path.resolve(__dirname, './resources/assets/'),
-  entry: {
-    'js/app.js': './js/app.js',
-    'css/app.css': [
-      '../../node_modules/bootstrap/dist/css/bootstrap.min.css'
-    ],
-  },
-  output: {
-    path: path.resolve(__dirname, './public/assets'),
-    filename: '[name]'
-  },
-  module: {
-    rules: [
-      {
-        test: /\.vue$/,
-        loader: 'vue-loader',
-        options: {
-          loaders: {
-            js: 'babel-loader'
-          }
-        }
-      },
-      {
-        test: /\.js$/,
-        loader: 'babel-loader',
-        exclude: /node_modules/
-      },
-      {
-        test: /\.css$/,
-        loader: ExtractTextPlugin.extract({
-          fallback: 'style-loader',
+const publicAssetsPath = path.resolve(__dirname, './public/assets');
+
+module.exports = (context, argv) => {
+  const devMode = argv.mode === 'development';
+
+  process.env.NODE_ENV = devMode ? 'development' : 'production';
+
+  const config = {
+    stats: 'none',
+    context: path.resolve(__dirname, './resources/assets/'),
+    entry: {
+      'app': [
+        './js/app.js',
+        '../../node_modules/bootstrap/dist/css/bootstrap.min.css'
+      ],
+    },
+    output: {
+      path: publicAssetsPath,
+      filename: 'js/[name].js',
+    },
+    module: {
+      rules: [
+        {
+          test: /\.vue$/,
+          loader: 'vue-loader',
+          options: {
+            loaders: {
+              js: {
+                loader: 'babel-loader',
+                options: {
+                  cacheDirectory: true,
+                },
+              },
+            },
+          },
+        },
+        {
+          test: /\.js$/,
+          loader: 'babel-loader',
+          exclude: /node_modules/,
+          options: {
+            cacheDirectory: true,
+          },
+        },
+        {
+          test: /\.(sa|sc|c)ss$/,
           use: [
             {
+              loader: MiniCssExtractPlugin.loader,
+              options: {
+                processUrls: false,
+              },
+            },
+            {
               loader: 'css-loader',
-              options: { url: false }
-            }
+              options: {
+                url: false,
+              },
+            },
           ],
-        }),
-      }
-    ]
-  },
-  resolve: {
-    alias: {
-      'vue$': 'vue/dist/vue.esm.js'
+        },
+      ],
     },
-    extensions: ['.js', '.vue', '.json', '.css']
-  },
-  plugins: [
-    new CleanWebpackPlugin(['public/assets']),
-    new ExtractTextPlugin('[name]')
-  ]
-};
+    resolve: {
+      alias: {
+        'vue$': 'vue/dist/vue.esm.js',
+      },
+      extensions: ['.js', '.vue', '.json', '.css'],
+    },
+    plugins: [
+      new CleanWebpackPlugin({
+        cleanOnceBeforeBuildPatterns: ['public/assets'],
+      }),
+      new MiniCssExtractPlugin({
+        filename: 'css/[name].css',
+      }),
+      new VueLoaderPlugin(),
+    ],
+  };
 
-if (process.env.NODE_ENV === 'production') {
-  module.exports.plugins = (module.exports.plugins || []).concat([
-    new webpack.DefinePlugin({
-      'process.env': {
-        NODE_ENV: '"production"'
-      }
-    }),
-    new webpack.optimize.UglifyJsPlugin({
-      sourceMap: true,
-      compress: {
-        warnings: false
-      }
-    }),
-    new webpack.LoaderOptionsPlugin({
-      minimize: true
-    }),
-    new OptimizeCssAssetsPlugin({
-      cssProcessorOptions: { discardComments: {removeAll: true } }
-    })
-  ]);
-}
+  if (!devMode) {
+    config.plugins = config.plugins.concat([
+      new webpack.LoaderOptionsPlugin({
+        minimize: true,
+      }),
+    ]);
+  }
+
+  return config;
+};

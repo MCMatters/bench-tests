@@ -23,8 +23,8 @@ class ReferenceVsOverriding extends Benchmark
      */
     public function test(): View
     {
-        return ViewFacade::make('benchmark.reference-overriding', [
-            'result' => $this->runTests([range(0, 10000)]),
+        return ViewFacade::make('benchmark.default', [
+            'results' => $this->runTests([range(0, 10000)]),
         ]);
     }
 

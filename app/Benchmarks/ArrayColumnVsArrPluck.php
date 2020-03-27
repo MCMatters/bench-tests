@@ -26,8 +26,8 @@ class ArrayColumnVsArrPluck extends Benchmark
      */
     public function test(): View
     {
-        return ViewFacade::make('benchmark.view', [
-            'result' => $this->runTests($this->getData()),
+        return ViewFacade::make('benchmark.default', [
+            'results' => $this->runTests($this->getData()),
         ]);
     }
 

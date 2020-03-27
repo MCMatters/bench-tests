@@ -10,6 +10,7 @@ services:
       - $PWD:/app:cached
       - $PWD/docker/php/local.ini:/usr/local/etc/php/conf.d/local.ini
       - shared_composer_cache:/root/.composer
+      - shared_npm_cache:/root/.yarn
     networks:
       - default
 
@@ -29,10 +30,12 @@ services:
 
 networks:
   default:
-    internal: true
+    external: false
   web:
     external: true
 
 volumes:
   shared_composer_cache:
+    external: true
+  shared_npm_cache:
     external: true

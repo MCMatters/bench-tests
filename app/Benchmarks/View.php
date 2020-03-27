@@ -25,7 +25,9 @@ class View extends Benchmark
         // Prevent advantage, because view has caching.
         (string) ViewFacade::make('index');
 
-        return ViewFacade::make('benchmark.view', ['result' => $this->runTests()]);
+        return ViewFacade::make('benchmark.default', [
+            'results' => $this->runTests(),
+        ]);
     }
 
     /**

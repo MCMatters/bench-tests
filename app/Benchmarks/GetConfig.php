@@ -34,7 +34,7 @@ class GetConfig extends Benchmark
 
         $result = $this->runTests();
 
-        return ViewFacade::make('benchmark.get-config', ['result' => $result]);
+        return ViewFacade::make('benchmark.default', ['results' => $result]);
     }
 
     /**

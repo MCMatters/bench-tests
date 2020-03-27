@@ -72,7 +72,8 @@ abstract class Benchmark
         }
 
         foreach ($executed as $method => $results) {
-            $result[$method] = [
+            $result[] = [
+                'name' => $method,
                 'min' => $this->min($results),
                 'max' => $this->max($results),
                 'avg' => $this->avg($results),

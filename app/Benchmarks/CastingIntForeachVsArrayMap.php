@@ -23,7 +23,9 @@ class CastingIntForeachVsArrayMap extends Benchmark
     {
         $items = \array_map('\strval', \range(0, 100000));
 
-        return ViewFacade::make('benchmark.view', ['result' => $this->runTests([$items])]);
+        return ViewFacade::make('benchmark.default', [
+            'results' => $this->runTests([$items]),
+        ]);
     }
 
     /**

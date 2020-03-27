@@ -33,7 +33,7 @@ class InArrayVsIsset extends Benchmark
         $exploded = array_filter(explode(' ', $string));
 
         return ViewFacade::make('benchmark.in_array-isset', [
-            'result' => $this->runTests([$count, $exploded], 10),
+            'results' => $this->runTests([$count, $exploded], 10),
             'count' => $count,
         ]);
     }
